@@ -1,10 +1,14 @@
 // API Client for MyHost Frontend
 class MyHostAPI {
-    constructor() {
-        this.baseURL = "https://host-12bk.onrender.com/api";
+  constructor() {
+    this.baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:3000/api"
+        : "https://host-12bk.onrender.com/api";
+    this.token = localStorage.getItem("authToken");
+  }
+}
 
-        this.token = localStorage.getItem('authToken');
-    }
 
     // Helper method to make API requests
     async makeRequest(endpoint, options = {}) {
