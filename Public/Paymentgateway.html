@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHost - Payment Gateway</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: #28a745;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .plan-details {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .plan-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+
+        .plan-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #28a745;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #28a745;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-group input.success {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-group .icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .payment-method {
+            flex: 1;
+            position: relative;
+        }
+
+        .payment-method input[type="radio"] {
+            display: none;
+        }
+
+        .payment-method label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .payment-method input[type="radio"]:checked+label {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+            color: #28a745;
+        }
+
+        .payment-method label i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .payment-method label span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-input {
+            position: relative;
+        }
+
+        .card-input input {
+            padding-left: 45px;
+        }
+
+        .card-input .card-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #28a745;
+        }
+
+        .amount-display {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .amount-display .label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .amount-display .amount {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .pay-button {
+            width: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .pay-button:active {
+            transform: translateY(0);
+        }
+
+        .pay-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .security-info i {
+            color: #28a745;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-message {
+            display: none;
+            background: #d1e7dd;
+            border: 1px solid #badbcc;
+            color: #0f5132;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-message i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .payment-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .payment-methods {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="payment-container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-server"></i>
+                <h1>MyHost</h1>
+            </div>
+            <p class="subtitle">Secure Payment Gateway</p>
+        </div>
+
+        <div class="plan-details" id="planDetails">
+            <div class="plan-name" id="planName">Premium Hosting</div>
+            <div class="plan-description" id="planDescription">Complete hosting solution with advanced features</div>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> Payment processed successfully! Thank you for your purchase.
+        </div>
+
+        <form id="paymentForm">
+            <div class="amount-display">
+                <div class="label">Total Amount</div>
+                <div class="amount" id="totalAmount">$22.49</div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-user-circle"></i> Personal Information
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName" required>
+                        <div class="error-message" id="fullNameError"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" required>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" required>
+                        <div class="error-message" id="phoneError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-wallet"></i> Payment Method
+                </div>
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <input type="radio" id="creditCard" name="paymentMethod" value="creditCard" checked>
+                        <label for="creditCard">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Card</span>
+                        </label>
+                    </div>
+                    <div class="payment-method">
+                        <input type="radio" id="paypal" name="paymentMethod" value="paypal">
+                        <label for="paypal">
+                            <i class="fab fa-paypal"></i>
+                            <span>PayPal</span>
+                        </label>
+                    </div>
+                    <div class="payment-method">
+                        <input type="radio" id="applePay" name="paymentMethod" value="applePay">
+                        <label for="applePay">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Apple Pay</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" id="cardDetails">
+                <div class="section-title">
+                    <i class="fas fa-shield-alt"></i> Card Details
+                </div>
+                <div class="form-row">
+                    <div class="form-group card-input">
+                        <label>Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <i class="fas fa-credit-card card-icon"></i>
+                        <div class="error-message" id="cardNumberError"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cardholder Name</label>
+                        <input type="text" id="cardName" required>
+                        <div class="error-message" id="cardNameError"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                        <div class="error-message" id="expiryError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="password" id="cvv" placeholder="123" maxlength="4" required>
+                        <div class="error-message" id="cvvError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" id="paypalDetails" style="display: none;">
+                <div class="section-title">
+                    <i class="fab fa-paypal"></i> PayPal Details
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>PayPal Email ID</label>
+                        <input type="email" id="paypalEmail" placeholder="your.email@example.com">
+                        <div class="error-message" id="paypalEmailError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" id="applePayDetails" style="display: none;">
+                <div class="section-title">
+                    <i class="fas fa-mobile-alt"></i> Apple Pay Details
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Apple ID</label>
+                        <input type="email" id="appleId" placeholder="your.appleid@example.com">
+                        <div class="error-message" id="appleIdError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="pay-button" id="payButton">
+                <div class="loading-spinner" id="loadingSpinner"></div>
+                <span id="buttonText">Pay Now - $22.49</span>
+            </button>
+
+            <div class="security-info">
+                <i class="fas fa-shield-alt"></i>
+                <span>Your payment information is secure and encrypted</span>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        class PaymentGateway {
+            constructor() {
+                this.form = document.getElementById('paymentForm');
+                this.payButton = document.getElementById('payButton');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.buttonText = document.getElementById('buttonText');
+                this.successMessage = document.getElementById('successMessage');
+                this.totalAmountElement = document.getElementById('totalAmount');
+                this.planNameElement = document.getElementById('planName');
+                this.planDescriptionElement = document.getElementById('planDescription');
+
+                this.currentAmount = 22.49; // Default amount
+
+                this.initializePaymentData();
+                this.initializeEventListeners();
+                this.setupCardFormatting();
+                this.setupPaymentMethodToggle();
+            }
+
+            initializePaymentData() {
+                // Get URL parameters to determine the selected plan
+                const urlParams = new URLSearchParams(window.location.search);
+                const plan = urlParams.get('plan') || 'premium';
+
+                // Set pricing and plan details based on the plan parameter
+                const planData = this.getPlanData(plan);
+                this.currentAmount = planData.price;
+
+                // Update UI elements
+                this.updatePlanDisplay(planData);
+            }
+
+            getPlanData(plan) {
+                const plans = {
+                    'premium': {
+                        name: 'Premium Hosting',
+                        price: 22.49,
+                        description: 'Complete hosting solution with advanced features'
+                    },
+                    'business': {
+                        name: 'Business Hosting',
+                        price: 55.49,
+                        description: 'Professional hosting for growing businesses'
+                    },
+                    'cloud': {
+                        name: 'Cloud Hosting',
+                        price: 111.49,
+                        description: 'Enterprise-grade cloud hosting solution'
+                    },
+                    'basic': {
+                        name: 'Basic Hosting',
+                        price: 9.99,
+                        description: 'Affordable hosting for small websites'
+                    },
+                    // Add alternative plan names that might be used
+                    'enterprise': {
+                        name: 'Cloud Hosting',
+                        price: 111.49,
+                        description: 'Enterprise-grade cloud hosting solution'
+                    },
+                    'pro': {
+                        name: 'Business Hosting',
+                        price: 55.49,
+                        description: 'Professional hosting for growing businesses'
+                    },
+                    'starter': {
+                        name: 'Basic Hosting',
+                        price: 9.99,
+                        description: 'Affordable hosting for small websites'
+                    }
+                };
+
+                // Debug: Log the plan parameter to console
+                console.log('Plan parameter received:', plan);
+                console.log('Available plans:', Object.keys(plans));
+
+                return plans[plan.toLowerCase()] || plans['premium'];
+            }
+
+            updatePlanDisplay(planData) {
+                this.planNameElement.textContent = planData.name;
+                this.planDescriptionElement.textContent = planData.description;
+                this.totalAmountElement.textContent = `$${planData.price}`;
+                this.buttonText.textContent = `Pay Now - $${planData.price}`;
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', this.handleSubmit.bind(this));
+
+                // Real-time validation
+                const inputs = this.form.querySelectorAll('input[required]');
+                inputs.forEach(input => {
+                    input.addEventListener('blur', () => this.validateField(input));
+                    input.addEventListener('input', () => this.clearError(input));
+                });
+            }
+
+            setupCardFormatting() {
+                const cardNumberInput = document.getElementById('cardNumber');
+                const expiryInput = document.getElementById('expiryDate');
+                const cvvInput = document.getElementById('cvv');
+
+                // Format card number
+                cardNumberInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
+                    if (formattedValue.length > 19) formattedValue = formattedValue.substr(0, 19);
+                    e.target.value = formattedValue;
+
+                    // Update card icon based on number
+                    this.updateCardIcon(value);
+                });
+
+                // Format expiry date
+                expiryInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                    }
+                    e.target.value = value;
+                });
+
+                // Restrict CVV to numbers only
+                cvvInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+            }
+
+            updateCardIcon(cardNumber) {
+                const cardIcon = document.querySelector('.card-icon');
+                const firstDigit = cardNumber.charAt(0);
+
+                if (firstDigit === '4') {
+                    cardIcon.className = 'fab fa-cc-visa card-icon';
+                } else if (firstDigit === '5') {
+                    cardIcon.className = 'fab fa-cc-mastercard card-icon';
+                } else if (firstDigit === '3') {
+                    cardIcon.className = 'fab fa-cc-amex card-icon';
+                } else {
+                    cardIcon.className = 'fas fa-credit-card card-icon';
+                }
+            }
+
+            setupPaymentMethodToggle() {
+                const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+                const cardDetails = document.getElementById('cardDetails');
+                const paypalDetails = document.getElementById('paypalDetails');
+                const applePayDetails = document.getElementById('applePayDetails');
+
+                paymentMethods.forEach(method => {
+                    method.addEventListener('change', (e) => {
+                        // Hide all payment detail sections
+                        cardDetails.style.display = 'none';
+                        paypalDetails.style.display = 'none';
+                        applePayDetails.style.display = 'none';
+
+                        // Clear required attributes from all payment inputs
+                        const cardInputs = cardDetails.querySelectorAll('input');
+                        const paypalInput = document.getElementById('paypalEmail');
+                        const applePayInput = document.getElementById('appleId');
+
+                        cardInputs.forEach(input => input.removeAttribute('required'));
+                        paypalInput.removeAttribute('required');
+                        applePayInput.removeAttribute('required');
+
+                        // Show the selected payment method section and set required attributes
+                        if (e.target.value === 'creditCard') {
+                            cardDetails.style.display = 'block';
+                            cardInputs.forEach(input => input.setAttribute('required', 'required'));
+                        } else if (e.target.value === 'paypal') {
+                            paypalDetails.style.display = 'block';
+                            paypalInput.setAttribute('required', 'required');
+                        } else if (e.target.value === 'applePay') {
+                            applePayDetails.style.display = 'block';
+                            applePayInput.setAttribute('required', 'required');
+                        }
+                    });
+                });
+            }
+
+            validateField(field) {
+                const fieldId = field.id;
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+
+                switch (fieldId) {
+                    case 'fullName':
+                        if (value.length < 2) {
+                            errorMessage = 'Please enter a valid full name';
+                            isValid = false;
+                        }
+                        break;
+                    case 'email':
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            errorMessage = 'Please enter a valid email address';
+                            isValid = false;
+                        }
+                        break;
+                    case 'phone':
+                        const phoneRegex = /^\+?[\d\s-()]{10,}$/;
+                        if (!phoneRegex.test(value)) {
+                            errorMessage = 'Please enter a valid phone number';
+                            isValid = false;
+                        }
+                        break;
+                    case 'cardNumber':
+                        const cardNumberClean = value.replace(/\s/g, '');
+                        if (cardNumberClean.length < 13 || cardNumberClean.length > 19) {
+                            errorMessage = 'Please enter a valid card number';
+                            isValid = false;
+                        }
+                        break;
+                    case 'cardName':
+                        if (value.length < 2) {
+                            errorMessage = 'Please enter the cardholder name';
+                            isValid = false;
+                        }
+                        break;
+                    case 'expiryDate':
+                        const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+                        if (!expiryRegex.test(value)) {
+                            errorMessage = 'Please enter a valid expiry date (MM/YY)';
+                            isValid = false;
+                        }
+                        break;
+                    case 'cvv':
+                        if (value.length < 3 || value.length > 4) {
+                            errorMessage = 'Please enter a valid CVV';
+                            isValid = false;
+                        }
+                        break;
+                    case 'paypalEmail':
+                        const paypalEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!paypalEmailRegex.test(value)) {
+                            errorMessage = 'Please enter a valid PayPal email address';
+                            isValid = false;
+                        }
+                        break;
+                    case 'appleId':
+                        const appleIdRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!appleIdRegex.test(value)) {
+                            errorMessage = 'Please enter a valid Apple ID';
+                            isValid = false;
+                        }
+                        break;
+                }
+
+                this.showFieldError(field, errorMessage, isValid);
+                return isValid;
+            }
+
+            showFieldError(field, message, isValid) {
+                const errorElement = document.getElementById(field.id + 'Error');
+
+                if (isValid) {
+                    field.classList.remove('error');
+                    field.classList.add('success');
+                    if (errorElement) errorElement.textContent = '';
+                } else {
+                    field.classList.remove('success');
+                    field.classList.add('error');
+                    if (errorElement) errorElement.textContent = message;
+                }
+            }
+
+            clearError(field) {
+                field.classList.remove('error', 'success');
+                const errorElement = document.getElementById(field.id + 'Error');
+                if (errorElement) errorElement.textContent = '';
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                // Validate all fields
+                const requiredFields = this.form.querySelectorAll('input[required]');
+                let isFormValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!this.validateField(field)) {
+                        isFormValid = false;
+                    }
+                });
+
+                if (!isFormValid) {
+                    return;
+                }
+
+                // Show loading state
+                this.setLoadingState(true);
+
+                try {
+                    // Simulate payment processing
+                    await this.processPayment();
+                    this.showSuccess();
+                } catch (error) {
+                    this.showError('Payment failed. Please try again.');
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+
+            async processPayment() {
+                // Simulate API call to payment processor
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Simulate 90% success rate
+                        if (Math.random() > 0.1) {
+                            resolve({
+                                success: true,
+                                transactionId: 'TXN_' + Date.now(),
+                                amount: this.currentAmount
+                            });
+                        } else {
+                            reject(new Error('Payment processing failed'));
+                        }
+                    }, 3000);
+                });
+            }
+
+            setLoadingState(isLoading) {
+                if (isLoading) {
+                    this.payButton.disabled = true;
+                    this.loadingSpinner.style.display = 'inline-block';
+                    this.buttonText.textContent = 'Processing Payment...';
+                } else {
+                    this.payButton.disabled = false;
+                    this.loadingSpinner.style.display = 'none';
+                    this.buttonText.textContent = `Pay Now - $${this.currentAmount}`;
+                }
+            }
+
+            showSuccess() {
+                this.form.style.display = 'none';
+                this.successMessage.style.display = 'block';
+
+                // Redirect to dashboard after successful payment
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 3000);
+            }
+
+            showError(message) {
+                alert(message); // In a real app, use a proper toast notification
+            }
+        }
+
+        // Initialize the payment gateway when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new PaymentGateway();
+        });
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.payment-container');
+            container.style.transform = 'translateY(20px)';
+            container.style.opacity = '0';
+
+            setTimeout(() => {
+                container.style.transition = 'all 0.6s ease';
+                container.style.transform = 'translateY(0)';
+                container.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

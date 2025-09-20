@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHost - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Reset and Base Styles */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #1d2a35;
+            line-height: 1.6;
+        }
+
+        /* CSS Variables */
+
+        :root {
+            --primary-color: #00b98e;
+            --secondary-color: #009d7a;
+            --accent-color: #00a67e;
+            --dark-green: #007a5e;
+            --light-green: #e8f5f2;
+            --text-dark: #1d2a35;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --warning-orange: #fd7e14;
+            --info-blue: #17a2b8;
+            --danger-red: #dc3545;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --border-color: #e9ecef;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        /* Alert Container */
+
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            animation: slideInRight 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-success {
+            background: var(--light-green);
+            color: var(--dark-green);
+            border-left: 4px solid var(--success-green);
+        }
+
+        .alert-error {
+            background: #ffe6e6;
+            color: #721c24;
+            border-left: 4px solid var(--danger-red);
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Dashboard Layout */
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+        }
+
+        .sidebar-content {
+            position: relative;
+            z-index: 2;
+            padding: 24px;
+            height: 100%;
+        }
+
+        /* Logo */
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            margin-right: 12px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* User Info */
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 32px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .user-avatar i {
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+
+        .user-details h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        /* Navigation */
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .nav-divider {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 16px 0;
+        }
+
+        /* Main Content */
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        /* Tab Content */
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tab Header */
+
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .tab-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .tab-header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Buttons */
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(0, 185, 142, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--dark-green) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 185, 142, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-green) 0%, #1e7e34 100%);
+            color: var(--white);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-blue) 0%, #138496 100%);
+            color: var(--white);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-outline-success {
+            background: transparent;
+            color: var(--success-green);
+            border: 2px solid var(--success-green);
+        }
+
+        .btn-outline-success:hover {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        /* Stats Grid */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 24px;
+            box-shadow: 0 5px 25px rgba(0, 185, 142, 0.1);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 185, 142, 0.2);
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            background: var(--light-green);
+            color: var(--primary-color);
+        }
+
+        .stat-icon.green {
+            background: #e8f5e8;
+            color: var(--success-green);
+        }
+
+        .stat-icon.blue {
+            background: #e3f2fd;
+            color: var(--info-blue);
+        }
+
+        .stat-icon.orange {
+            background: #fff3e0;
+            color: var(--warning-orange);
+        }
+
+        .stat-icon i {
+            font-size: 24px;
+        }
+
+        .stat-content h3 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-content p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Content Grid */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 32px;
+        }
+
+        .content-main {
+            min-width: 0;
+        }
+
+        .content-sidebar {
+            min-width: 0;
+        }
+
+        /* Cards */
+
+        .card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: var(--light-green);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-green);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Quick Actions */
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quick-actions .btn {
+            width: 100%;
+        }
+
+        /* Activity Items */
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--light-green);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content h4 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .activity-content p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .activity-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Account Cards */
+
+        .account-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .account-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .account-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .account-domain {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .account-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-suspended {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .account-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Forms */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 185, 142, 0.1);
+        }
+
+        .form-control[readonly] {
+            background: var(--light-gray);
+            cursor: not-allowed;
+        }
+
+        /* Contact Info */
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-item i {
+            color: var(--primary-color);
+            width: 20px;
+        }
+
+        .contact-info hr {
+            border: none;
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+
+        .contact-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .contact-info p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 4px 0;
+        }
+
+        /* Security Actions */
+
+        .security-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .security-actions .btn {
+            width: 100%;
+        }
+
+        /* Empty States */
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Tables */
+
+        .table-container {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--light-green);
+            color: var(--dark-green);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .table tr:hover {
+            background: rgba(0, 185, 142, 0.05);
+        }
+
+        /* Loading States */
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .sidebar-content {
+                padding: 16px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .account-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .account-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+
+            .account-details {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions .btn {
+                padding: 16px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Alert Container -->
+    <div id="alert-container" class="alert-container"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <i class="fas fa-server"></i>
+                    <h1>MyHost</h1>
+                </div>
+
+                <!-- User Info -->
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3 id="user-name">Lakshay</h3>
+                        <p id="user-email">lakshaydiman21518@gmail.com</p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav">
+                    <a href="#" class="nav-link active" data-tab="overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="nav-link" data-tab="hosting">
+                        <i class="fas fa-server"></i>
+                        <span>Hosting Accounts</span>
+                    </a>
+                    <a href="#" class="nav-link" data-tab="domains">
+                        <i class="fas fa-globe"></i>
+                        <span>Domains</span>
+                    </a>
+                    <a href="#" class="nav-link" data-tab="orders">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Orders</span>
+                    </a>
+                    <a href="#" class="nav-link" data-tab="support">
+                        <i class="fas fa-headset"></i>
+                        <span>Support</span>
+                    </a>
+                    <a href="#" class="nav-link" data-tab="profile">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Profile</span>
+                    </a>
+                    <hr class="nav-divider">
+                    <a href="#" class="nav-link" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content active">
+                <div class="tab-header">
+                    <div>
+                        <h2>Dashboard Overview</h2>
+                        <p>Welcome back, Lakshay! Here's your account overview.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="active-hosting-count">2</h3>
+                            <p>Active Hosting</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="domains-count">2</h3>
+                            <p>Domains</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="orders-count">3</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="days-member">375</h3>
+                            <p>Days as Member</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Grid -->
+                <div class="content-grid">
+                    <div class="content-main">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Recent Activities</h3>
+                            </div>
+                            <div class="card-body" id="recent-activities">
+                                <!-- Activities will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-sidebar">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Quick Actions</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="quick-actions">
+                                    <button class="btn btn-primary" onclick="redirectToHosting()">
+                                        <i class="fas fa-plus"></i>
+                                        Buy Hosting
+                                    </button>
+                                    <button class="btn btn-success" onclick="redirectToDomain()">
+                                        <i class="fas fa-search"></i>
+                                        Search Domain
+                                    </button>
+                                    <button class="btn btn-info" onclick="redirectToContact()">
+                                        <i class="fas fa-headset"></i>
+                                        Get Support
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hosting Tab -->
+            <div id="hosting-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Hosting Accounts</h2>
+                </div>
+                <div id="hosting-accounts-list">
+                    <!-- Hosting accounts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Domains Tab -->
+            <div id="domains-tab" class="tab-content">
+                <div class="tab-header">
+                    <div>
+                        <h2>My Domains</h2>
+                    </div>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Register Domain
+                    </button>
+                </div>
+                <div id="domains-list">
+                    <!-- Domains will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Order History</h2>
+                </div>
+                <div id="orders-list">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Support Tab -->
+            <div id="support-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Support Center</h2>
+                </div>
+                <div class="content-grid">
+                    <div class="content-main">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Contact Support</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="support-form">
+                                    <div class="form-group">
+                                        <label>Subject</label>
+                                        <input type="text" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Priority</label>
+                                        <select class="form-control">
+                                            <option value="medium">Medium</option>
+                                            <option value="low">Low</option>
+                                            <option value="high">High</option>
+                                            <option value="urgent">Urgent</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Message</label>
+                                        <textarea class="form-control" rows="5" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-sidebar">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Contact Info</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <span>+91 7018321518</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>support@myhost.com</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>24/7 Support</span>
+                                    </div>
+                                    <hr>
+                                    <h4>Response Times:</h4>
+                                    <p>General: 2-4 hours</p>
+                                    <p>Urgent: 30 minutes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Profile Settings</h2>
+                </div>
+                <div class="content-grid">
+                    <div class="content-main">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Personal Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="profile-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Full Name</label>
+                                            <input type="text" class="form-control" id="profile-name" value="Lakshay">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" id="profile-email"
+                                                value="lakshaydiman21518@gmail.com" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone</label>
+                                        <input type="tel" class="form-control" id="profile-phone"
+                                            value="+1 (555) 123-4567">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-sidebar">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Security</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="security-actions">
+                                    <button class="btn btn-outline-primary">Change Password</button>
+                                    <button class="btn btn-outline-success">Enable 2FA</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard JavaScript
+        class Dashboard {
+            constructor() {
+                this.currentTab = 'overview';
+                this.dashboardData = null;
+                this.init();
+            }
+
+            async init() {
+                this.loadMockData();
+                this.updateUI();
+                this.setupEventListeners();
+            }
+
+            loadMockData() {
+                // Mock data for demonstration
+                this.dashboardData = {
+                    user: {
+                        id: '1',
+                        fullName: 'Lakshay',
+                        email: 'lakshaydiman21518@gmail.com',
+                        phone: '+91 7018321518 ',
+                        createdAt: '2025-01-15T00:00:00Z'
+                    },
+                    hostingAccounts: [{
+                        id: '1',
+                        planType: 'Premium',
+                        domainName: 'example.com',
+                        status: 'active',
+                        diskSpaceGb: 100,
+                        bandwidthGb: 1000,
+                        expiresAt: '2026-12-31T00:00:00Z'
+                    }, {
+                        id: '2',
+                        planType: 'Basic',
+                        domainName: 'mysite.com',
+                        status: 'active',
+                        diskSpaceGb: 25,
+                        bandwidthGb: 250,
+                        expiresAt: '2026-08-15T00:00:00Z'
+                    }],
+                    domains: [{
+                        id: '1',
+                        domainName: 'example.com',
+                        status: 'registered',
+                        price: 12.99,
+                        expiresAt: '2026-12-31T00:00:00Z'
+                    }, {
+                        id: '2',
+                        domainName: 'mysite.com',
+                        status: 'registered',
+                        price: 10.99,
+                        expiresAt: '2026-08-15T00:00:00Z'
+                    }],
+                    orders: [{
+                        id: '1001',
+                        planType: 'Premium Hosting',
+                        amount: 99.99,
+                        status: 'completed',
+                        createdAt: '2025-01-15T10:30:00Z'
+                    }, {
+                        id: '1002',
+                        planType: 'Domain Registration',
+                        amount: 12.99,
+                        status: 'completed',
+                        createdAt: '2025-01-10T14:20:00Z'
+                    }, {
+                        id: '1003',
+                        planType: 'Basic Hosting',
+                        amount: 49.99,
+                        status: 'pending',
+                        createdAt: '2025-01-20T09:15:00Z'
+                    }]
+                };
+            }
+
+            setupEventListeners() {
+                // Navigation links
+                document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const tab = e.currentTarget.getAttribute('data-tab');
+                        this.showTab(tab);
+                    });
+                });
+
+                // Support form
+                const supportForm = document.getElementById('support-form');
+                if (supportForm) {
+                    supportForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleSupportSubmit(e);
+                    });
+                }
+
+                // Profile form
+                const profileForm = document.getElementById('profile-form');
+                if (profileForm) {
+                    profileForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleProfileSubmit(e);
+                    });
+                }
+            }
+
+            showTab(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Show selected tab
+                const selectedTab = document.getElementById(tabName + '-tab');
+                if (selectedTab) {
+                    selectedTab.classList.add('active');
+                }
+
+                // Update nav links
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                const activeLink = document.querySelector(`[data-tab="${tabName}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+
+                this.currentTab = tabName;
+                this.updateTabContent(tabName);
+            }
+
+            updateUI() {
+                this.updateUserInfo();
+                this.updateOverview();
+                this.updateHostingAccounts();
+                this.updateDomains();
+                this.updateOrders();
+            }
+
+            updateUserInfo() {
+                const user = this.dashboardData.user;
+
+                // Update sidebar user info
+                const userName = document.getElementById('user-name');
+                const userEmail = document.getElementById('user-email');
+
+                if (userName) userName.textContent = user.fullName;
+                if (userEmail) userEmail.textContent = user.email;
+
+                // Update profile form
+                const profileName = document.getElementById('profile-name');
+                const profileEmail = document.getElementById('profile-email');
+                const profilePhone = document.getElementById('profile-phone');
+
+                if (profileName) profileName.value = user.fullName;
+                if (profileEmail) profileEmail.value = user.email;
+                if (profilePhone) profilePhone.value = user.phone;
+            }
+
+            updateOverview() {
+                const data = this.dashboardData;
+
+                // Update stat cards
+                const activeHostingCount = document.getElementById('active-hosting-count');
+                const domainsCount = document.getElementById('domains-count');
+                const ordersCount = document.getElementById('orders-count');
+                const daysMember = document.getElementById('days-member');
+
+                if (activeHostingCount) {
+                    activeHostingCount.textContent = data.hostingAccounts.filter(h => h.status === 'active').length;
+                }
+                if (domainsCount) {
+                    domainsCount.textContent = data.domains.length;
+                }
+                if (ordersCount) {
+                    ordersCount.textContent = data.orders.length;
+                }
+                if (daysMember) {
+                    const createdDate = new Date(data.user.createdAt);
+                    const daysDiff = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+                    daysMember.textContent = daysDiff;
+                }
+
+                // Update recent activities
+                this.updateRecentActivities();
+            }
+
+            updateRecentActivities() {
+                const container = document.getElementById('recent-activities');
+                if (!container) return;
+
+                const orders = this.dashboardData.orders.slice(0, 5);
+
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No Recent Activities</h3>
+                            <p>Your recent activities will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                orders.forEach(order => {
+                    const date = this.formatDate(order.createdAt);
+                    const statusClass = this.getStatusClass(order.status);
+
+                    html += `
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>${order.planType}</h4>
+                                <p>${date}</p>
+                            </div>
+                            <div class="activity-status ${statusClass}">
+                                ${order.status}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            updateTabContent(tabName) {
+                switch (tabName) {
+                    case 'hosting':
+                        this.updateHostingAccounts();
+                        break;
+                    case 'domains':
+                        this.updateDomains();
+                        break;
+                    case 'orders':
+                        this.updateOrders();
+                        break;
+                }
+            }
+
+            updateHostingAccounts() {
+                const container = document.getElementById('hosting-accounts-list');
+                if (!container) return;
+
+                const accounts = this.dashboardData.hostingAccounts;
+
+                if (accounts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-server"></i>
+                            <h3>No Hosting Accounts</h3>
+                            <p>You don't have any hosting accounts yet.</p>
+                            <button class="btn btn-primary">Get Hosting</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                accounts.forEach(account => {
+                    const statusClass = this.getAccountStatusClass(account.status);
+                    const expiryDate = this.formatDate(account.expiresAt);
+
+                    html += `
+                        <div class="account-card">
+                            <div class="account-header">
+                                <div>
+                                    <div class="account-title">${account.planType} Plan</div>
+                                    <div class="account-domain">Domain: ${account.domainName || 'Not assigned'}</div>
+                                </div>
+                                <div>
+                                    <div class="account-status ${statusClass}">${account.status}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        Expires: ${expiryDate}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Storage</div>
+                                    <div class="detail-value">${account.diskSpaceGb} GB</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Bandwidth</div>
+                                    <div class="detail-value">${account.bandwidthGb} GB</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Status</div>
+                                    <div class="detail-value">${account.status}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            updateDomains() {
+                const container = document.getElementById('domains-list');
+                if (!container) return;
+
+                const domains = this.dashboardData.domains;
+
+                if (domains.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-globe"></i>
+                            <h3>No Domains</h3>
+                            <p>You don't have any domains registered yet.</p>
+                            <button class="btn btn-primary">Register Domain</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                domains.forEach(domain => {
+                    const statusClass = this.getAccountStatusClass(domain.status);
+                    const expiryDate = domain.expiresAt ? this.formatDate(domain.expiresAt) : 'N/A';
+
+                    html += `
+                        <div class="account-card">
+                            <div class="account-header">
+                                <div>
+                                    <div class="account-title">${domain.domainName}</div>
+                                    <div class="account-domain">${domain.price}/year</div>
+                                </div>
+                                <div>
+                                    <div class="account-status ${statusClass}">${domain.status}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        Expires: ${expiryDate}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            updateOrders() {
+                const container = document.getElementById('orders-list');
+                if (!container) return;
+
+                const orders = this.dashboardData.orders;
+
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>No Orders</h3>
+                            <p>You haven't placed any orders yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Plan</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                orders.forEach(order => {
+                    const date = this.formatDate(order.createdAt);
+                    const statusClass = this.getStatusClass(order.status);
+
+                    html += `
+                        <tr>
+                            <td>#${order.id}</td>
+                            <td>${order.planType}</td>
+                            <td>${order.amount}</td>
+                            <td><span class="activity-status ${statusClass}">${order.status}</span></td>
+                            <td>${date}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            }
+
+            handleSupportSubmit(e) {
+                const form = e.target;
+                const formData = new FormData(form);
+
+                // Simulate form submission
+                this.showAlert('Support ticket submitted successfully!', 'success');
+                form.reset();
+            }
+
+            handleProfileSubmit(e) {
+                const form = e.target;
+                const formData = new FormData(form);
+
+                // Update user data
+                const name = document.getElementById('profile-name').value;
+                const phone = document.getElementById('profile-phone').value;
+
+                this.dashboardData.user.fullName = name;
+                this.dashboardData.user.phone = phone;
+
+                // Update UI
+                document.getElementById('user-name').textContent = name;
+
+                this.showAlert('Profile updated successfully!', 'success');
+            }
+
+            showAlert(message, type = 'success') {
+                const alertContainer = document.getElementById('alert-container');
+                const alertId = 'alert-' + Date.now();
+
+                const alertHtml = `
+                    <div id="${alertId}" class="alert alert-${type}">
+                        <span>${message}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    const alert = document.getElementById(alertId);
+                    if (alert) alert.remove();
+                }, 5000);
+            }
+
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+
+            getStatusClass(status) {
+                switch (status) {
+                    case 'completed':
+                    case 'active':
+                    case 'registered':
+                        return 'status-completed';
+                    case 'pending':
+                        return 'status-pending';
+                    case 'failed':
+                    case 'suspended':
+                    case 'expired':
+                        return 'status-failed';
+                    default:
+                        return 'status-pending';
+                }
+            }
+
+            getAccountStatusClass(status) {
+                switch (status) {
+                    case 'active':
+                    case 'registered':
+                        return 'status-active';
+                    case 'suspended':
+                    case 'pending':
+                        return 'status-suspended';
+                    case 'expired':
+                        return 'status-expired';
+                    default:
+                        return 'status-suspended';
+                }
+            }
+        }
+
+        // Global functions
+        function showTab(tabName) {
+            if (window.dashboard) {
+                window.dashboard.showTab(tabName);
+            }
+        }
+
+        function refreshDashboard() {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Dashboard refreshed successfully!', 'success');
+                // Simulate refresh by reloading data
+                window.dashboard.loadMockData();
+                window.dashboard.updateUI();
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.dashboard.showAlert('Logging out...', 'success');
+                // Clear any stored authentication data
+                localStorage.removeItem('authToken');
+                sessionStorage.clear();
+
+                // Redirect to index.html after a short delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
+        }
+
+        // Quick Actions redirect functions
+        function redirectToHosting() {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Redirecting to hosting page...', 'success');
+            }
+            setTimeout(() => {
+                window.location.href = 'hosting.html';
+            }, 2000);
+        }
+
+        function redirectToDomain() {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Redirecting to domain search...', 'success');
+            }
+            setTimeout(() => {
+                window.location.href = 'domain.html';
+            }, 2000);
+        }
+
+        function redirectToContact() {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Redirecting to support center...', 'success');
+            }
+            setTimeout(() => {
+                window.location.href = 'contact.html';
+            }, 2000);
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Dashboard page loaded, initializing...');
+            window.dashboard = new Dashboard();
+
+            // Add smooth scrolling for any anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Add loading states to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.classList.contains('loading')) {
+                        const originalText = this.innerHTML;
+                        this.classList.add('loading');
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+                        setTimeout(() => {
+                            this.classList.remove('loading');
+                            this.innerHTML = originalText;
+                        }, 1000);
+                    }
+                });
+            });
+
+            // Add hover effects to cards
+            document.querySelectorAll('.stat-card, .card, .account-card').forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-5px)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
