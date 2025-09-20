@@ -1,7 +1,7 @@
 // API Client for MyHost Frontend
 class MyHostAPI {
     constructor() {
-        this.baseURL = 'http://localhost:3000/api';
+        this.baseURL = "https://host-12bk.onrender.com";
         this.token = localStorage.getItem('authToken');
     }
 
